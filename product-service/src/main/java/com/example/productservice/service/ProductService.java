@@ -1,6 +1,7 @@
 package com.example.productservice.service;
 
 
+import com.example.productservice.exception.ProductNotFoundException;
 import com.example.productservice.model.Product;
 import com.example.productservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class ProductService {
 
     public Product getProductById(Long id){
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id " + id));
     }
 
     public Product updateProduct(Long id, Product productDetails){
@@ -40,6 +41,12 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id){
-        productRepository.deleteById(id);
+
+        Product product = productRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ProductNotFoundException("Product not found with id " + id));
+
+
+        productRepository.delete(product);
     }
 }

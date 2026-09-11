@@ -3,8 +3,12 @@ package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductClient;
 import com.example.orderservice.dto.ProductResponse;
+import com.example.orderservice.exception.OrderNotFoundException;
+import com.example.orderservice.exception.OutOfStockException;
+import com.example.orderservice.exception.ProductNotFoundException;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.repository.OrderRepository;
+import feign.FeignException;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,7 @@ public class OrderService {
         return productClient.getProductById(productId);
     }
 
-    //Just testing service
+    // Just testing service
     public void testFeignCall(Long productId) {
         ProductResponse product = productClient.getProductById(productId);
         System.out.println("Product fetched via Feign: " + product.getName());
@@ -37,16 +41,28 @@ public class OrderService {
 
     public Order placeOrder(Long productId, int quantity) {
 
-        ProductResponse productResponse = productClient.getProductById(productId);
+        ProductResponse productResponse;
+
+        try {
+            productResponse = productClient.getProductById(productId);
+
+        } catch (FeignException.NotFound ex) {
+
+            throw new ProductNotFoundException(
+                    "Product not found with id: " + productId
+            );
+        }
 
         if (productResponse == null || productResponse.getStock() == null) {
-            throw new RuntimeException("Product not found!");
-
+            throw new ProductNotFoundException(
+                    "Product not found with id: " + productId
+            );
         }
 
         if (productResponse.getStock() <= quantity) {
-            throw new RuntimeException("Product out of stock!");
-
+            throw new OutOfStockException(
+                    "Product is out of stock"
+            );
         }
 
         Order order = new Order();
@@ -56,12 +72,13 @@ public class OrderService {
 
         Order saveOrder = orderRepository.save(order);
 
-        System.out.println("Order placed successfully for " + productResponse.getName());
+        System.out.println(
+                "Order placed successfully for " + productResponse.getName()
+        );
+
         return saveOrder;
     }
 
-
-    // Methods
 
     public Order createOrder(Order order) {
         order.setStatus("PENDING");
@@ -75,7 +92,8 @@ public class OrderService {
     }
 
     public Order getOrderById(Long id) {
-        return orderRepository.findById(id).orElse(null);
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found! with id: " + id ));
     }
 
 

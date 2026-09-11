@@ -4,6 +4,7 @@ package com.example.orderservice.controller;
 import com.example.orderservice.dto.ProductResponse;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class OrderController {
     //method
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
+    public Order createOrder(@Valid @RequestBody Order order) {
         return orderService.createOrder(order);
     }
 

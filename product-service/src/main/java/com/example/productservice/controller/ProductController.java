@@ -3,6 +3,7 @@ package com.example.productservice.controller;
 
 import com.example.productservice.model.Product;
 import com.example.productservice.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Product> addProduct(@RequestBody Product product){
+    public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product){
         return ResponseEntity.ok(productService.addProduct(product));
 
     }
