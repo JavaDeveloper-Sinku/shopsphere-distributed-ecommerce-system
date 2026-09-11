@@ -49,4 +49,20 @@ public class ProductService {
 
         productRepository.delete(product);
     }
+
+    public Product updateStock(Long productId, int quantity) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new RuntimeException("Product not found with id: " + productId)
+                );
+
+        if (product.getStock() < quantity) {
+            throw new RuntimeException("Insufficient stock");
+        }
+
+        product.setStock(product.getStock() - quantity);
+
+        return productRepository.save(product);
+    }
 }

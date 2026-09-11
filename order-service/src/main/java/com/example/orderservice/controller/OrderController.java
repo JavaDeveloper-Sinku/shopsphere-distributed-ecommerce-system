@@ -1,10 +1,11 @@
 package com.example.orderservice.controller;
 
 
-import com.example.orderservice.dto.ProductResponse;
+import com.example.orderservice.dto.response.ProductResponse;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.service.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,4 +50,27 @@ public class OrderController {
     public Order getOrder(@PathVariable Long id) {
         return orderService.getOrderById(id);
     }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Order> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+
+        Order updatedOrder =
+                orderService.updateOrderStatus(id, status);
+
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PutMapping("/payment/{paymentId}/confirm")
+    public ResponseEntity<Order> confirmOrderByPayment(
+            @PathVariable Long paymentId) {
+
+        Order updatedOrder =
+                orderService.updateOrderFromPayment(paymentId);
+
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+
 }
